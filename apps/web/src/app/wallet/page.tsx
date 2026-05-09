@@ -200,15 +200,20 @@ function BalanceCard({
       <div className="relative z-10 px-6 py-10 sm:px-10 sm:py-12">
         {plaintext === null ? (
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                private balance reference
+                your balance
               </div>
-              <div className="break-all font-mono text-base text-primary/85 sm:text-lg">
-                {handle ?? "—"}
+              <div className="flex items-end gap-3">
+                <span aria-hidden className="text-primary/80">
+                  <LockBigGlyph />
+                </span>
+                <span className="font-display text-5xl font-medium leading-none tracking-tight text-primary/85 sm:text-6xl md:text-7xl">
+                  ✱✱✱✱
+                </span>
               </div>
               <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/70">
-                this is what every observer sees on Etherscan
+                private · only you can read it
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
@@ -701,4 +706,23 @@ function relativeTime(ts: number): string {
   if (d < 30) return `${d}d ago`;
   const mo = Math.floor(d / 30);
   return `${mo}mo ago`;
+}
+
+function LockBigGlyph() {
+  return (
+    <svg
+      width="56"
+      height="56"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      aria-hidden
+      className="block sm:h-[68px] sm:w-[68px] md:h-[80px] md:w-[80px]"
+    >
+      <rect x="4" y="11" width="16" height="10" />
+      <path d="M7 11V7a5 5 0 0110 0v4" />
+      <circle cx="12" cy="16" r="1.4" fill="currentColor" stroke="none" />
+    </svg>
+  );
 }
