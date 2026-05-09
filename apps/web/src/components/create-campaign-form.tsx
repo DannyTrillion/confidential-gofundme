@@ -218,8 +218,8 @@ export function CreateCampaignForm() {
         </Field>
 
         <Field
-          label="Beneficiary wallet"
-          hint="// public on-chain · donors verify on Etherscan before they give"
+          label="Recipient wallet"
+          hint="// shown publicly · donors verify it before giving · for sensitive causes (medical, safety, dissident funding) consider using a fresh wallet you don't use for anything else"
         >
           <Input
             required
@@ -231,8 +231,8 @@ export function CreateCampaignForm() {
         </Field>
 
         <Field
-          label="Recipient encryption pubkey (optional)"
-          hint="// 32-byte curve25519 hex · enables private notes from donors only the recipient can read"
+          label="Private message key (optional)"
+          hint="// lets donors send you a message only you can read · paste a 64-character key here, or leave blank"
         >
           <Input
             value={recipientPubkey}

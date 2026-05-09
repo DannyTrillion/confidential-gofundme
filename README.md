@@ -30,12 +30,44 @@ The smart contract performs `FHE.add()` on encrypted donation handles. The on-ch
 
 ---
 
+## Privacy properties (and what's still public)
+
+Worth being explicit about, because "private donations" can be read more strongly than the system actually delivers.
+
+**What FHE protects in this app:**
+- **Each individual donation amount.** No observer — including the contract, the platform, Etherscan, other donors, or Zama infrastructure — can read how much any one donor gave. Amounts are encrypted on the donor's device and live on-chain only as `bytes32` ciphertext handles.
+- **Sealed donor messages.** Optional notes from donors are encrypted to the recipient's Curve25519 pubkey via X25519 sealed-box. Only the recipient can decrypt.
+- **Private balance reveal.** Donors can decrypt *only their own* balance via the EIP-712 user-decrypt flow. Other parties cannot.
+
+**What FHE explicitly does *not* protect — these stay fully public on Sepolia:**
+
+| Public on-chain | Why |
+|---|---|
+| **Donor wallet address** | Every `donate()` is signed by `msg.sender` and indexed in the `Donated(donor, …)` event. A wallet associated with a real identity (ENS, exchange KYC, social) is correlatable. |
+| **Donation timing** | Block timestamps + per-event indexing mean an observer can build a map of "wallet X donated to campaign Y at time T." |
+| **Counterparty (which campaign)** | The campaign address is in the event log. Knowing who donated to *what* is public. |
+| **Operator approvals** | `setOperator(holder, operator, until)` is a public token event. It usually precedes a donation, so even the *intent to donate* leaks before the donation does. |
+| **Sealed-message length** | `note: bytes` length is observable. Notes of fixed or distinctive length are distinguishable. |
+| **Running total over time** | `_encTotal` is `makePubliclyDecryptable`. An observer querying it before and after a donation can compute that donation's amount inferentially. **This is structural** — the public progress bar requires it. Mitigations (random delays, batched updates) hurt UX. |
+| **Story content + cover images** | Stored on IPFS via Pinata. Public. By design. |
+| **Recipient wallet** | Published on-chain so donors can verify before giving. For sensitive causes (medical, safety, dissident funding), the create-form UI suggests using a fresh wallet not tied to anything else. |
+| **Token mint events (test mode)** | The faucet emits `ConfidentialTransfer(0x0, X, …)`, so wallets that have ever interacted with the platform are enumerable. Acceptable on testnet; replaced by the wrap-from-USDC flow on mainnet. |
+| **User-decrypt requests** | Zama's relayer sees that wallet X requested decryption of handle H at time T. The relayer never sees plaintext (it re-encrypts to your ephemeral keypair), but the *fact you decrypted* is observable to Zama infrastructure. Inherent to the architecture. |
+
+**One-sentence honest framing:**
+
+> **Donation amounts are private. The fact that a donation happened — by whom, to what, when — is not.** This is a real trade-off of building on a public chain. A determined observer with chain-analysis tooling can build a "who gave to what when" map without ever reading a single amount.
+
+For most causes (medical bills, education, community projects), the amount privacy is the meaningful thing — donors are most uncomfortable about being publicly ranked by how much they gave. For high-threat-model causes (whistleblower funding, dissident support, abuse-recovery), this app does **not** offer adequate protection on its own; donors should mix funds via a privacy pool (e.g. Tornado Cash on supported chains, Aztec, Privacy Pools) before donating.
+
+---
+
 ## Verified contracts (Sepolia)
 
 | Contract | Address | Etherscan |
 |---|---|---|
-| **CampaignFactory** | `0x389acc6A9db28A28162B6081075Ce3d76a76AF08` | [Read Contract ↗](https://sepolia.etherscan.io/address/0x389acc6A9db28A28162B6081075Ce3d76a76AF08#code) |
-| **ConfidentialUSDC** (cUSDC, ERC-7984) | `0x95Ac720fc206B826d62f1e9AbE40D5605aa1078B` | [Read Contract ↗](https://sepolia.etherscan.io/address/0x95Ac720fc206B826d62f1e9AbE40D5605aa1078B#code) |
+| **CampaignFactory** | `0x9E667068D47a481cD060797694C7675DE6548cB5` | [Read Contract ↗](https://sepolia.etherscan.io/address/0x9E667068D47a481cD060797694C7675DE6548cB5#code) |
+| **ConfidentialUSDC** (USDC test token, ERC-7984) | `0x65179330f31704cD1631d125697BFB846B791256` | [Read Contract ↗](https://sepolia.etherscan.io/address/0x65179330f31704cD1631d125697BFB846B791256#code) |
 
 Each Campaign instance the factory deploys is auto-verified by Etherscan via bytecode match.
 

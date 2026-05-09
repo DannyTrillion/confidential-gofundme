@@ -504,6 +504,10 @@ export default function CampaignDetail() {
                 <dd className="text-primary">private</dd>
               </div>
               <div className="flex justify-between">
+                <dt className="text-muted-foreground">private message to recipient</dt>
+                <dd className="text-primary">sealed</dd>
+              </div>
+              <div className="flex justify-between">
                 <dt className="text-muted-foreground">running total</dt>
                 <dd className="text-foreground">public</dd>
               </div>
@@ -512,10 +516,17 @@ export default function CampaignDetail() {
                 <dd className="text-foreground">public</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">donor messages</dt>
-                <dd className="text-primary">sealed</dd>
+                <dt className="text-muted-foreground">donor wallet</dt>
+                <dd className="text-foreground">public</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">donation timing</dt>
+                <dd className="text-foreground">public</dd>
               </div>
             </dl>
+            <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground/70">
+              // amounts are private · the fact that you donated is on-chain
+            </p>
           </div>
 
           {snap?.beneficiary && snap.beneficiary !== "0x0000000000000000000000000000000000000000" && (
