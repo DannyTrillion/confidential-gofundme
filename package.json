@@ -1,0 +1,17 @@
+{
+  "name": "confidential-gofundme",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm -r build",
+    "contracts:compile": "pnpm --filter contracts compile",
+    "contracts:test": "pnpm --filter contracts test",
+    "contracts:deploy:sepolia": "pnpm --filter contracts deploy:sepolia",
+    "contracts:deploy:local": "pnpm --filter contracts deploy:local"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

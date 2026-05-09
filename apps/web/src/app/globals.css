@@ -1,0 +1,250 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 180 67% 1%;
+    --foreground: 0 0% 96%;
+    --card: 180 30% 3%;
+    --card-foreground: 0 0% 96%;
+    --muted: 180 10% 8%;
+    --muted-foreground: 0 0% 55%;
+    --primary: 49 100% 50%;
+    --primary-foreground: 180 67% 4%;
+    --accent: 156 11% 48%;
+    --accent-foreground: 0 0% 96%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 180 10% 12%;
+    --input: 180 10% 12%;
+    --ring: 49 100% 50%;
+    --radius: 0px;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html, body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    background-image:
+      linear-gradient(to right, hsla(0, 0%, 100%, 0.025) 1px, transparent 1px),
+      linear-gradient(to bottom, hsla(0, 0%, 100%, 0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-attachment: fixed;
+    animation: grid-breathe 6s ease-in-out infinite;
+  }
+
+  ::selection {
+    background-color: hsl(49 100% 50%);
+    color: hsl(180 67% 4%);
+  }
+}
+
+@layer components {
+  .grid-fade {
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+  }
+
+  .scanlines::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      hsla(0, 0%, 100%, 0.015) 0px,
+      hsla(0, 0%, 100%, 0.015) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
+  }
+
+  .glow-yellow {
+    box-shadow:
+      0 0 0 1px hsl(49 100% 50%),
+      0 0 24px -2px hsla(49, 100%, 50%, 0.4);
+  }
+
+  .crt-scan {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .crt-scan::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -10%;
+    height: 30vh;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      hsla(49, 100%, 50%, 0.015) 40%,
+      hsla(49, 100%, 50%, 0.04) 50%,
+      hsla(49, 100%, 50%, 0.015) 60%,
+      transparent 100%
+    );
+    animation: scanline-sweep 8s linear infinite;
+  }
+
+  .terminal-cursor::after {
+    content: "_";
+    margin-left: 0.15em;
+    animation: blink 1.05s steps(1) infinite;
+    color: hsl(49 100% 50%);
+  }
+
+  .focus-cursor:focus-visible {
+    box-shadow: inset -2px 0 0 hsl(49 100% 50%);
+    animation: cursor-blink 1.05s steps(1) infinite;
+  }
+
+  .hover-flicker:hover {
+    animation: border-flicker 0.45s steps(2);
+    border-color: hsl(49 100% 50%);
+  }
+
+  .hover-glow:hover {
+    box-shadow:
+      0 0 0 1px hsl(49 100% 50%),
+      0 0 18px -4px hsla(49, 100%, 50%, 0.55),
+      0 0 32px -8px hsla(49, 100%, 50%, 0.35);
+  }
+}
+
+@layer utilities {
+  .font-mono { font-family: var(--font-geist-mono), ui-monospace, "Menlo", monospace; }
+  /* Body/UI default — Geist Mono. Was Space Grotesk; routed to Geist Mono so
+     anything not explicitly font-display also reads as Geist Mono. */
+  .font-sans { font-family: var(--font-geist-mono), ui-monospace, "Menlo", monospace; }
+  .anim-pulse-yellow { animation: pulse-yellow 1.6s ease-in-out infinite; }
+  .anim-flicker { animation: flicker 4s steps(1) infinite; }
+  .anim-marquee { animation: marquee 38s linear infinite; }
+  .anim-marquee:hover { animation-play-state: paused; }
+
+  /* Counter — soft aurora behind the giant flickering total. */
+  .counter-aurora {
+    background:
+      radial-gradient(60% 70% at 25% 50%, hsla(49, 100%, 50%, 0.14), transparent 65%),
+      radial-gradient(50% 60% at 80% 50%, hsla(49, 100%, 50%, 0.08), transparent 70%);
+    filter: blur(10px);
+    animation: aurora-breathe 9s ease-in-out infinite;
+  }
+  .counter-scan {
+    background-image: repeating-linear-gradient(
+      135deg,
+      hsla(49, 100%, 50%, 0.06) 0,
+      hsla(49, 100%, 50%, 0.06) 1px,
+      transparent 1px,
+      transparent 9px
+    );
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 30%, transparent 85%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 30%, transparent 85%);
+  }
+
+  /* FHE.add diagram — engineering grid background. */
+  .diagram-grid {
+    background-image:
+      linear-gradient(to right, hsla(180, 10%, 30%, 0.18) 1px, transparent 1px),
+      linear-gradient(to bottom, hsla(180, 10%, 30%, 0.18) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 30%, transparent 90%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 30%, transparent 90%);
+  }
+
+  /* Hero — animated aurora + scanlines, contained to the hero shell. */
+  .hero-shell {
+    isolation: isolate;
+  }
+  .hero-aurora {
+    background:
+      radial-gradient(60% 50% at 22% 30%, hsla(49, 100%, 50%, 0.18), transparent 60%),
+      radial-gradient(45% 40% at 78% 65%, hsla(49, 100%, 50%, 0.10), transparent 65%);
+    filter: blur(8px);
+    animation: aurora-breathe 9s ease-in-out infinite;
+  }
+  .hero-scan {
+    background-image: repeating-linear-gradient(
+      135deg,
+      hsla(49, 100%, 50%, 0.07) 0,
+      hsla(49, 100%, 50%, 0.07) 1px,
+      transparent 1px,
+      transparent 9px
+    );
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 80%);
+  }
+}
+
+@keyframes aurora-breathe {
+  0%, 100% { opacity: 0.55; transform: translate3d(0, 0, 0) scale(1); }
+  50%      { opacity: 0.95; transform: translate3d(0, -1%, 0) scale(1.03); }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes cursor-blink {
+  0%, 49% { box-shadow: inset -2px 0 0 hsl(49 100% 50%); }
+  50%, 100% { box-shadow: inset -2px 0 0 transparent; }
+}
+
+@keyframes scanline-sweep {
+  0%   { transform: translateY(-30vh); }
+  100% { transform: translateY(120vh); }
+}
+
+@keyframes grid-breathe {
+  0%, 100% { background-size: 48px 48px; }
+  50%      { background-size: 49px 49px; }
+}
+
+@keyframes pulse-yellow {
+  0%, 100% {
+    color: hsl(49 100% 50%);
+    text-shadow: 0 0 0 transparent;
+  }
+  50% {
+    color: hsl(49 100% 65%);
+    text-shadow: 0 0 18px hsla(49, 100%, 50%, 0.6);
+  }
+}
+
+@keyframes border-flicker {
+  0%   { border-color: hsl(49 100% 50%); }
+  20%  { border-color: hsl(180 10% 12%); }
+  40%  { border-color: hsl(49 100% 50%); }
+  60%  { border-color: hsl(180 10% 12%); }
+  100% { border-color: hsl(49 100% 50%); }
+}
+
+@keyframes flicker {
+  0%, 96%, 100% { opacity: 1; }
+  97%           { opacity: 0.55; }
+  98%           { opacity: 1; }
+  99%           { opacity: 0.7; }
+}
+
+@keyframes trace-flow {
+  0%   { stroke-dashoffset: 660; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { stroke-dashoffset: 0;   opacity: 0; }
+}
