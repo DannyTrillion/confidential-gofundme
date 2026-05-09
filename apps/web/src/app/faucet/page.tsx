@@ -159,6 +159,95 @@ export default function FaucetPage() {
           </p>
         </aside>
       </div>
+
+      <SepoliaEthFaucets />
     </div>
+  );
+}
+
+/// Small directory of trustworthy Sepolia ETH faucets. Even with test USDC,
+/// donors still need a tiny amount of Sepolia ETH to pay gas. Links open
+/// in new tabs.
+function SepoliaEthFaucets() {
+  const FAUCETS: Array<{
+    name: string;
+    href: string;
+    note: string;
+  }> = [
+    {
+      name: "Google Cloud · Web3 faucet",
+      href: "https://cloud.google.com/application/web3/faucet/ethereum/sepolia",
+      note: "0.05 ETH per day · most reliable · sign in with Google",
+    },
+    {
+      name: "Alchemy faucet",
+      href: "https://www.alchemy.com/faucets/ethereum-sepolia",
+      note: "0.025 ETH · requires 0.001 ETH on mainnet",
+    },
+    {
+      name: "QuickNode faucet",
+      href: "https://faucet.quicknode.com/ethereum/sepolia",
+      note: "0.05 ETH · daily · twitter or wallet check",
+    },
+    {
+      name: "Infura faucet",
+      href: "https://www.infura.io/faucet/sepolia",
+      note: "0.5 ETH · requires Infura account",
+    },
+    {
+      name: "Chainlink faucet",
+      href: "https://faucets.chain.link/sepolia",
+      note: "0.1 ETH · github auth · also LINK testnet",
+    },
+    {
+      name: "pk910 PoW faucet",
+      href: "https://sepolia-faucet.pk910.de/",
+      note: "no signup · mines in browser · IP-restricted from datacenters",
+    },
+  ];
+
+  return (
+    <section className="space-y-5">
+      <div>
+        <SectionMarker label="get sepolia eth (for gas)" />
+        <h2 className="mt-3 max-w-2xl font-display text-2xl font-medium uppercase leading-tight tracking-tight sm:text-3xl">
+          You also need a little Sepolia ETH.
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          Sending any transaction on Ethereum costs gas. Sepolia ETH is free —
+          claim a bit from one of these faucets, then come back and donate. Try
+          Google Cloud first, it&apos;s the most reliable.
+        </p>
+      </div>
+
+      <ul className="grid gap-px border border-border bg-border md:grid-cols-2 lg:grid-cols-3">
+        {FAUCETS.map((f) => (
+          <li key={f.href}>
+            <a
+              href={f.href}
+              target="_blank"
+              rel="noreferrer"
+              className="group block h-full bg-background p-5 transition-colors hover:bg-card/60"
+            >
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="font-display text-base font-medium uppercase tracking-tight text-foreground transition-colors group-hover:text-primary">
+                  {f.name}
+                </span>
+                <span className="font-mono text-[11px] text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                  open ↗
+                </span>
+              </div>
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                {f.note}
+              </p>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/70">
+        // not affiliated with any of these · third-party services may rate-limit
+      </p>
+    </section>
   );
 }
