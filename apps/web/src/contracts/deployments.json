@@ -1045,7 +1045,7 @@
       {
         "anonymous": false,
         "inputs": [],
-        "name": "TotalUpdated",
+        "name": "ProgressUpdated",
         "type": "event"
       },
       {
@@ -1226,6 +1226,34 @@
         "outputs": [
           {
             "internalType": "euint64",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getProgressBuckets",
+        "outputs": [
+          {
+            "internalType": "ebool",
+            "name": "",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "ebool",
+            "name": "",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "ebool",
+            "name": "",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "ebool",
             "name": "",
             "type": "bytes32"
           }

@@ -6,7 +6,7 @@ import { Contract, JsonRpcProvider } from "ethers";
 import { ProgressBar } from "@/components/progress-bar";
 import { CategoryPill } from "@/components/category-pill";
 import { CoverImage } from "@/components/cover-image";
-import { CAMPAIGN_ABI, DEPLOYMENTS } from "@/lib/contracts";
+import { CAMPAIGN_ABI } from "@/lib/contracts";
 import { gatewayUrl } from "@/lib/ipfs-client";
 import { getFhevmInstance } from "@/lib/fhevm";
 import { tokenUnitsToUsd } from "@/lib/format";
@@ -20,10 +20,22 @@ type Meta = {
   coverSrc?: string;
 };
 
+/// Demo-mode helper: derive bucketsLit from precomputed plaintext numbers.
+/// Production path uses the on-chain ebools instead.
+function deriveBucketsFromUsd(raisedUsd: number, goalUsd: number): 0 | 1 | 2 | 3 | 4 {
+  if (goalUsd <= 0) return 0;
+  const ratio = raisedUsd / goalUsd;
+  if (ratio >= 1) return 4;
+  if (ratio >= 0.75) return 3;
+  if (ratio >= 0.5) return 2;
+  if (ratio >= 0.25) return 1;
+  return 0;
+}
+
 export function CampaignCard({ address }: { address: `0x${string}` }) {
   const [donors, setDonors] = useState<bigint | null>(null);
   const [goalUsd, setGoalUsd] = useState<number>(0);
-  const [raisedUsd, setRaisedUsd] = useState<number>(0);
+  const [bucketsLit, setBucketsLit] = useState<0 | 1 | 2 | 3 | 4>(0);
   const [meta, setMeta] = useState<Meta>({});
   const [closed, setClosed] = useState<boolean>(false);
 
@@ -33,7 +45,8 @@ export function CampaignCard({ address }: { address: `0x${string}` }) {
       if (m) {
         setDonors(BigInt(m.donors));
         setGoalUsd(m.goalUsd);
-        setRaisedUsd(m.raisedUsd);
+        // Demo mode has plaintext mock numbers — derive buckets directly.
+        setBucketsLit(deriveBucketsFromUsd(m.raisedUsd, m.goalUsd));
         setMeta({
           title: m.title,
           pseudonym: m.pseudonym,
@@ -49,11 +62,19 @@ export function CampaignCard({ address }: { address: `0x${string}` }) {
         process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL ?? "https://ethereum-sepolia-rpc.publicnode.com",
       );
       const c = new Contract(address, CAMPAIGN_ABI, provider);
-      const [count, ipfsHash, goalTokens, totalHandle, category, closedFlag] = await Promise.all([
+      const [count, ipfsHash, goalTokens, buckets, category, closedFlag] = await Promise.all([
         c.publicDonorCount(),
         c.ipfsHash(),
         c.goal(),
-        c.getEncryptedTotal(),
+        // v4 contracts don't have getProgressBuckets — fall back to four zero
+        // handles, which decrypt as `false` (or the publicDecrypt fails silently
+        // below). Card still renders with the bar at 0/4.
+        c.getProgressBuckets().catch(() => [
+          "0x" + "0".repeat(64),
+          "0x" + "0".repeat(64),
+          "0x" + "0".repeat(64),
+          "0x" + "0".repeat(64),
+        ] as const),
         c.category(),
         c.closed().catch(() => false),
       ]);
@@ -65,9 +86,11 @@ export function CampaignCard({ address }: { address: `0x${string}` }) {
 
       try {
         const instance = await getFhevmInstance();
-        const decoded = await instance.publicDecrypt([totalHandle]);
-        const totalTokens = decoded.clearValues[totalHandle] as bigint;
-        if (!cancelled) setRaisedUsd(Number(tokenUnitsToUsd(totalTokens)));
+        const handles = [buckets[0], buckets[1], buckets[2], buckets[3]];
+        const decoded = await instance.publicDecrypt(handles);
+        const flips = handles.map((h) => Boolean(decoded.clearValues[h]));
+        const lit = flips.filter(Boolean).length as 0 | 1 | 2 | 3 | 4;
+        if (!cancelled) setBucketsLit(lit);
       } catch {}
 
       try {
@@ -89,7 +112,7 @@ export function CampaignCard({ address }: { address: `0x${string}` }) {
     };
   }, [address]);
 
-  const funded = goalUsd > 0 && raisedUsd >= goalUsd;
+  const funded = bucketsLit >= 4;
 
   return (
     <Link
@@ -129,7 +152,7 @@ export function CampaignCard({ address }: { address: `0x${string}` }) {
         </div>
 
         <div className="mt-6">
-          <ProgressBar raised={raisedUsd} goal={goalUsd} compact />
+          <ProgressBar bucketsLit={bucketsLit} goalUsd={goalUsd} compact showGoal={false} />
         </div>
 
         <div className="mt-auto flex items-center justify-between pt-5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">

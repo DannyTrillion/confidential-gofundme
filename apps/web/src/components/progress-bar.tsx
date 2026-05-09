@@ -3,25 +3,30 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-/// LED-segment progress meter. Each cell is a small filled/unfilled rectangle
-/// that snaps on as `raised/goal` rises. The "leading" cell (next to be lit)
-/// pulses, signalling live progress.
+/// Privacy-first LED progress meter. The contract exposes 4 publicly
+/// decryptable bucket flags (past25 / past50 / past75 / past100); the
+/// precise running total stays encrypted to the beneficiary. So instead
+/// of "73%" we render the highest crossed bucket, snapping cells to one
+/// of {0, 6, 12, 18, 24} of `cells`.
+///
+/// `bucketsLit` is the count of `true` buckets (0-4). `goalUsd` is the
+/// public goal, shown for context. We deliberately do not show "raised"
+/// — that information is no longer public, by design.
 export function ProgressBar({
-  raised,
-  goal,
+  bucketsLit,
+  goalUsd,
   cells = 24,
   compact = false,
-  showAmount = true,
+  showGoal = true,
 }: {
-  raised: number;
-  goal: number;
+  bucketsLit: 0 | 1 | 2 | 3 | 4;
+  goalUsd: number;
   cells?: number;
   compact?: boolean;
-  showAmount?: boolean;
+  showGoal?: boolean;
 }) {
-  const pct = goal > 0 ? Math.min(1, raised / goal) : 0;
-  const targetLit = Math.round(pct * cells);
-  const funded = raised >= goal && goal > 0;
+  const targetLit = Math.round((bucketsLit / 4) * cells);
+  const funded = bucketsLit >= 4;
 
   // Light cells one at a time on mount / change — feels like real hardware.
   const [lit, setLit] = useState(0);
@@ -38,9 +43,10 @@ export function ProgressBar({
       <div className="flex items-center gap-3">
         <div
           role="progressbar"
-          aria-valuenow={Math.round(pct * 100)}
+          aria-valuenow={bucketsLit}
           aria-valuemin={0}
-          aria-valuemax={100}
+          aria-valuemax={4}
+          aria-valuetext={bucketLabel(bucketsLit)}
           className="flex flex-1 items-stretch gap-[2px]"
         >
           {Array.from({ length: cells }).map((_, i) => {
@@ -65,23 +71,40 @@ export function ProgressBar({
         </div>
         <span
           className={cn(
-            "min-w-[3.5em] text-right font-mono text-[11px] uppercase tracking-widest tabular-nums",
+            "min-w-[5em] text-right font-mono text-[10px] uppercase tracking-widest",
             funded ? "text-primary" : "text-muted-foreground",
           )}
         >
-          {Math.round(pct * 100)}%
+          {bucketLabel(bucketsLit)}
         </span>
       </div>
-      {showAmount && (
+      {showGoal && (
         <div className="flex items-center justify-between text-[10px] uppercase tracking-wider">
-          <span className={funded ? "text-primary" : "text-foreground"}>
-            {formatUsd(raised)}
+          <span className="text-muted-foreground">
+            // amounts encrypted · per-donor totals private
           </span>
-          <span className="text-muted-foreground">of {formatUsd(goal)}</span>
+          <span className="text-muted-foreground">goal {formatUsd(goalUsd)}</span>
         </div>
       )}
     </div>
   );
+}
+
+function bucketLabel(bucketsLit: number): string {
+  switch (bucketsLit) {
+    case 0:
+      return "< 25%";
+    case 1:
+      return "≥ 25%";
+    case 2:
+      return "≥ 50%";
+    case 3:
+      return "≥ 75%";
+    case 4:
+      return "GOAL REACHED";
+    default:
+      return "—";
+  }
 }
 
 function formatUsd(amount: number): string {

@@ -23,14 +23,43 @@ import { CAMPAIGN_ABI, DEPLOYMENTS, ensureDeployed } from "@/lib/contracts";
 import { getFhevmInstance } from "@/lib/fhevm";
 import { gatewayUrl } from "@/lib/ipfs-client";
 import { tokenUnitsToUsd } from "@/lib/format";
-import { pseudoLabel, shortAddress } from "@/lib/utils";
+import { cn, pseudoLabel, shortAddress } from "@/lib/utils";
 import { DEMO_MODE, findMockCampaign } from "@/lib/demo";
+
+/// Demo-mode helper: derive bucketsLit from precomputed plaintext numbers.
+/// Production path uses the on-chain ebools instead.
+function deriveBucketsFromUsd(raisedUsd: number, goalUsd: number): 0 | 1 | 2 | 3 | 4 {
+  if (goalUsd <= 0) return 0;
+  const ratio = raisedUsd / goalUsd;
+  if (ratio >= 1) return 4;
+  if (ratio >= 0.75) return 3;
+  if (ratio >= 0.5) return 2;
+  if (ratio >= 0.25) return 1;
+  return 0;
+}
+
+/// Stat-card label for the "Progress (public)" cell. Coarser than the
+/// progress bar's own label, since it has to fit in the headline slot.
+function bucketStatLabel(bucketsLit: 0 | 1 | 2 | 3 | 4): string {
+  switch (bucketsLit) {
+    case 0:
+      return "< 25%";
+    case 1:
+      return "≥ 25%";
+    case 2:
+      return "≥ 50%";
+    case 3:
+      return "≥ 75%";
+    case 4:
+      return "GOAL";
+  }
+}
 
 type Snapshot = {
   donors: bigint;
   creator: string;
   goalUsd: number;
-  raisedUsd: number;
+  bucketsLit: 0 | 1 | 2 | 3 | 4;
   category: number;
   coverSrc?: string;
   title?: string;
@@ -64,7 +93,7 @@ export default function CampaignDetail() {
         donors: BigInt(mock.donors),
         creator: "0xc0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0",
         goalUsd: mock.goalUsd,
-        raisedUsd: mock.raisedUsd,
+        bucketsLit: deriveBucketsFromUsd(mock.raisedUsd, mock.goalUsd),
         category: mock.category,
         coverSrc: mock.coverDataUri,
         title: mock.title,
@@ -105,7 +134,7 @@ export default function CampaignDetail() {
         ipfsHash,
         creator,
         goalTokens,
-        totalHandle,
+        buckets,
         category,
         updatesCount,
         vouchersCount,
@@ -118,7 +147,12 @@ export default function CampaignDetail() {
         safeRead("ipfsHash", () => c.ipfsHash(), ""),
         safeRead("creator", () => c.creator(), "0x0000000000000000000000000000000000000000"),
         safeRead("goal", () => c.goal(), 0n),
-        safeRead("getEncryptedTotal", () => c.getEncryptedTotal(), "0x" + "0".repeat(64)),
+        safeRead("getProgressBuckets", () => c.getProgressBuckets(), [
+          "0x" + "0".repeat(64),
+          "0x" + "0".repeat(64),
+          "0x" + "0".repeat(64),
+          "0x" + "0".repeat(64),
+        ] as const),
         safeRead("category", () => c.category(), 4),
         safeRead("updatesCount", () => c.updatesCount(), 0n),
         safeRead("vouchersCount", () => c.vouchersCount(), 0n),
@@ -129,12 +163,13 @@ export default function CampaignDetail() {
       ]);
 
       const goalUsd = Number(tokenUnitsToUsd(BigInt(goalTokens)));
-      let raisedUsd = 0;
+      let bucketsLit: 0 | 1 | 2 | 3 | 4 = 0;
       try {
         const instance = await getFhevmInstance();
-        const decoded = await instance.publicDecrypt([totalHandle]);
-        const totalTokens = decoded.clearValues[totalHandle] as bigint;
-        raisedUsd = Number(tokenUnitsToUsd(totalTokens));
+        const handles = [buckets[0], buckets[1], buckets[2], buckets[3]];
+        const decoded = await instance.publicDecrypt(handles);
+        const flips = handles.map((h) => Boolean(decoded.clearValues[h]));
+        bucketsLit = flips.filter(Boolean).length as 0 | 1 | 2 | 3 | 4;
       } catch {}
 
       let title: string | undefined;
@@ -187,7 +222,7 @@ export default function CampaignDetail() {
           donors,
           creator,
           goalUsd,
-          raisedUsd,
+          bucketsLit,
           category: Number(category),
           coverSrc,
           title,
@@ -229,7 +264,7 @@ export default function CampaignDetail() {
     );
   }
 
-  const funded = snap ? snap.goalUsd > 0 && snap.raisedUsd >= snap.goalUsd : false;
+  const funded = snap ? snap.bucketsLit >= 4 : false;
   const closed = snap?.closed ?? false;
   const isCreator =
     !!address && !!snap?.creator && address.toLowerCase() === snap.creator.toLowerCase();
@@ -310,25 +345,23 @@ export default function CampaignDetail() {
                 </div>
               </div>
               <div className="bg-card/60 p-5">
-                <div className="font-mono text-2xl font-semibold tabular-nums text-primary sm:text-3xl">
-                  {snap && snap.goalUsd > 0 ? (
-                    <CountUp
-                      value={Math.min(100, Math.round((snap.raisedUsd / snap.goalUsd) * 100))}
-                      format={(n) => `${Math.round(n)}%`}
-                    />
-                  ) : (
-                    "—"
+                <div
+                  className={cn(
+                    "font-mono text-2xl font-semibold tabular-nums sm:text-3xl",
+                    funded ? "text-primary" : "text-foreground",
                   )}
+                >
+                  {snap ? bucketStatLabel(snap.bucketsLit) : "—"}
                 </div>
                 <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  of goal
+                  Progress (public)
                 </div>
               </div>
               <div className="bg-card/60 p-5">
                 <div className="font-mono text-2xl font-semibold tabular-nums sm:text-3xl">
                   {snap ? (
                     <CountUp
-                      value={snap.raisedUsd}
+                      value={snap.goalUsd}
                       format={(n) =>
                         new Intl.NumberFormat("en-US", {
                           style: "currency",
@@ -343,12 +376,16 @@ export default function CampaignDetail() {
                   )}
                 </div>
                 <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Raised
+                  Goal
                 </div>
               </div>
             </div>
             <div className="border border-border bg-card/40 p-5">
-              <ProgressBar raised={snap?.raisedUsd ?? 0} goal={snap?.goalUsd ?? 0} />
+              <ProgressBar bucketsLit={snap?.bucketsLit ?? 0} goalUsd={snap?.goalUsd ?? 0} />
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground/70">
+                // running total stays encrypted to the beneficiary · only the
+                bucket flags are public · per-donor amounts blurred to 25%-of-goal intervals
+              </p>
             </div>
           </section>
 
