@@ -142,14 +142,14 @@ export default function HeroVisual() {
 
       {/* corner readout right — hidden on mobile to avoid overlapping the canvas */}
       <div className="pointer-events-none absolute right-3 top-12 z-10 hidden flex-col items-end gap-0.5 font-mono text-[9px] uppercase tracking-widest text-primary/75 sm:flex">
-        <span>each donation sealed</span>
-        <span>recipient wallet public</span>
-        <span>only the total is shown</span>
+        <span>donations stay private</span>
+        <span>recipient is shown</span>
+        <span>only the total is public</span>
       </div>
 
       {/* corner readout left — hidden on mobile */}
       <div className="pointer-events-none absolute bottom-10 left-3 z-10 hidden flex-col gap-0.5 font-mono text-[9px] uppercase tracking-widest text-primary/75 sm:flex">
-        <span>// no one sees individual gifts</span>
+        <span>// no one sees individual donations</span>
         <span>not even us</span>
       </div>
 

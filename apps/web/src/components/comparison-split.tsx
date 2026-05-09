@@ -42,9 +42,8 @@ export function ComparisonSplit() {
         </h3>
         <p className="max-w-2xl text-sm text-muted-foreground">
           On a normal fundraising platform, every donor&apos;s name and exact amount sits on
-          a public leaderboard. On Confidential GoFundMe, individual donation amounts are encrypted
-          on-chain — donors aren&apos;t named in a leaderboard, and only the running total
-          is publicly visible.
+          a public leaderboard. On Confidential GoFundMe, individual donation amounts are kept
+          private — donors aren&apos;t ranked, and only the running total is publicly visible.
         </p>
       </div>
 
@@ -71,7 +70,7 @@ export function ComparisonSplit() {
           ↳ donor names, exact amounts, leaderboard rank — all visible to anyone
         </div>
         <div className="bg-background p-4 font-mono text-[10px] uppercase tracking-widest text-primary">
-          ↳ only the running total · individual amounts encrypted on-chain
+          ↳ only the running total is shown · each donation stays private
         </div>
       </div>
     </section>

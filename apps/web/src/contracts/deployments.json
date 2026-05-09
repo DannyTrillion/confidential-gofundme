@@ -1,7 +1,7 @@
 {
   "chainId": 11155111,
-  "token": "0x95Ac720fc206B826d62f1e9AbE40D5605aa1078B",
-  "factory": "0x389acc6A9db28A28162B6081075Ce3d76a76AF08",
+  "token": "0x65179330f31704cD1631d125697BFB846B791256",
+  "factory": "0x9E667068D47a481cD060797694C7675DE6548cB5",
   "tokenDecimals": 6,
   "abis": {
     "ConfidentialUSDC": [

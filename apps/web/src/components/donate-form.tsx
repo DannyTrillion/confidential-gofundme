@@ -107,16 +107,15 @@ export function DonateForm({
       const token = new Contract(DEPLOYMENTS.token, TOKEN_ABI, signer);
       const campaign = new Contract(campaignAddress, CAMPAIGN_ABI, signer);
 
-      // Step 1 of 2 — operator approval (skipped if cached as already approved)
+      // First-time donors approve the campaign once, then donate.
       if (needsOperator) {
-        setStage("Step 1 of 2 · approving campaign as operator");
+        setStage("Step 1 of 2 · letting the campaign accept your donation");
         const tx0 = await token.setOperator(campaignAddress, FAR_FUTURE);
         await tx0.wait();
         setNeedsOperator(false);
       }
 
-      // Step 2 — encrypt amount + (optionally) seal the note + donate
-      setStage("Encrypting amount…");
+      setStage("Making your amount private…");
       const instance = await getFhevmInstance();
       const enc = await instance
         .createEncryptedInput(campaignAddress, address)
@@ -178,18 +177,18 @@ export function DonateForm({
             disabled={busy}
           />
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/70">
-            // encrypted to the recipient&apos;s pubkey · {note.length}/280
+            // private message to the recipient · {note.length}/280
           </p>
         </div>
       ) : null}
 
       <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-        // amount → euint64 · added on ciphertext
+        // your amount stays private · only the running total is shown
       </p>
 
       {needsOperator && !DEMO_MODE && isConnected && (
         <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/80">
-          // first donation from this wallet · two transactions
+          // first donation from this wallet · needs two confirmations
         </p>
       )}
 

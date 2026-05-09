@@ -197,10 +197,10 @@ export default function BrowsePage() {
         {/* What's private — plain-language chips */}
         <div className="relative z-10 mt-4 flex flex-wrap items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest sm:gap-2">
           <SpecChip>donation amounts hidden</SpecChip>
-          <SpecChip>recipient wallet public</SpecChip>
-          <SpecChip>messages sealed</SpecChip>
-          <SpecChip>Sepolia testnet</SpecChip>
-          <SpecChip subdued>no platform fee</SpecChip>
+          <SpecChip>recipient wallet shown</SpecChip>
+          <SpecChip>private messages</SpecChip>
+          <SpecChip>test mode</SpecChip>
+          <SpecChip subdued>no fee</SpecChip>
         </div>
 
         {/* Main 2-col split */}
@@ -274,9 +274,9 @@ export default function BrowsePage() {
           />
           <AnimatedStat
             variant="literal"
-            display="fhEVM"
-            label="Powered by Zama"
-            caption="Privacy you can verify"
+            display="Zama"
+            label="Privacy by Zama"
+            caption="Provable. Verifiable."
           />
         </div>
       </section>
@@ -499,8 +499,8 @@ export default function BrowsePage() {
               network cost to send each transaction.
             </p>
             <p>
-              Built on Ethereum&apos;s Sepolia test network, using Zama&apos;s FHE technology and
-              the ERC-7984 confidential token standard.
+              Built on Ethereum&apos;s test network, using Zama&apos;s privacy technology and
+              a confidential-token standard for encrypted balances.
             </p>
           </div>
         </details>

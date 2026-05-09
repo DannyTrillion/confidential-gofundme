@@ -165,7 +165,7 @@ export function EncryptedTotalCounter() {
               <span className="text-primary">live · all campaigns</span>
             </span>
             <span className="hidden text-muted-foreground/70 sm:inline">
-              chain · sepolia
+              test mode
             </span>
           </div>
 

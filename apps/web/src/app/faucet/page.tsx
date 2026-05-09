@@ -39,7 +39,7 @@ export default function FaucetPage() {
       return;
     }
     try {
-      ensureDeployed(DEPLOYMENTS.token, "cUSDC token");
+      ensureDeployed(DEPLOYMENTS.token, "USDC token");
     } catch (e: any) {
       setError(e?.message ?? String(e));
       return;
@@ -87,28 +87,32 @@ export default function FaucetPage() {
   return (
     <div className="space-y-12">
       <div className="space-y-5">
-        <SectionMarker label="cUSDC test faucet" />
+        <SectionMarker label="get test usdc" />
         <h1 className="max-w-3xl text-balance font-display text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl md:text-6xl">
-          Mint test cUSDC.<br />
+          Get test USDC.<br />
           <span className="text-muted-foreground">Donate to live campaigns instantly.</span>
         </h1>
+        <p className="max-w-2xl text-sm text-muted-foreground">
+          This is play-money USDC for the demo. Click the button, and you&apos;ll get a
+          private balance you can donate from. No real money involved.
+        </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="border border-border bg-card/40">
           <div className="border-b border-border p-5">
             <h2 className="font-mono text-sm font-semibold uppercase tracking-tight">
-              Mint cUSDC — open faucet
+              Get test USDC
             </h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              Confidential ERC-7984 token (USD-denominated) · balances and transfers stay encrypted
+              Your balance is private — only you can see it
             </p>
           </div>
           <div className="p-5">
             <WalletGate
               compact
-              title="Connect to mint"
-              description="Connect your wallet on Sepolia to mint test cUSDC."
+              title="Connect to get test USDC"
+              description="Connect your wallet to receive test USDC for the demo."
             >
               <div className="space-y-5">
                 <div className="space-y-2">
@@ -125,11 +129,11 @@ export default function FaucetPage() {
                 {error && <p className="font-mono text-xs text-destructive">// {error}</p>}
                 {done && (
                   <p className="font-mono text-xs uppercase tracking-wider text-primary">
-                    // minted · check your balance via user-decrypt
+                    // received · view your private balance on the Wallet page
                   </p>
                 )}
                 <Button onClick={mint} disabled={busy} size="lg">
-                  {busy ? "Minting…" : "Mint cUSDC →"}
+                  {busy ? "Sending…" : "Get test USDC →"}
                 </Button>
               </div>
             </WalletGate>
@@ -139,19 +143,19 @@ export default function FaucetPage() {
         <aside className="border border-border bg-card/40 p-5">
           <AsciiGlyph name="orb" className="mb-4" />
           <h3 className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-            How it works
+            About this faucet
           </h3>
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-            The faucet encrypts your requested amount client-side and calls{" "}
-            <span className="font-mono text-foreground">mint(externalEuint64)</span>. The token
-            contract runs <span className="font-mono text-foreground">FHE.fromExternal</span>,
-            verifies the proof, and credits an encrypted balance.
+            This is a demo on a test network. The button gives you free test USDC so you
+            can try out donations without spending real money.
           </p>
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-            On mainnet, this faucet would be replaced by an{" "}
-            <span className="font-mono text-foreground">ERC7984ERC20Wrapper</span> over real USDC —
-            donors wrap USDC into cUSDC before donating, and beneficiaries unwrap back to USDC
-            after withdrawing. The Campaign contract is unchanged in either deployment.
+            Your balance is kept private — even we can&apos;t see it. Only you, the wallet
+            owner, can decrypt it on the Wallet page.
+          </p>
+          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+            On the live version, this step would be replaced by converting real USDC into a
+            private version. Donations and amounts work the same way either way.
           </p>
         </aside>
       </div>

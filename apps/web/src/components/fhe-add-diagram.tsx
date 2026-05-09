@@ -33,26 +33,27 @@ const TOTAL = "$250";
 const TOTAL_HANDLE = "0xff5a4…1c92";
 
 const PHASE_TITLE: Record<Phase, string> = {
-  show: "01 · plaintext",
-  encrypting: "02 · encrypting on donor device",
-  encrypted: "03 · ciphertext sent on-chain",
-  computing: "04 · FHE.add() · computing on ciphertext",
-  outputCipher: "05 · result is also ciphertext",
-  output: "06 · public total revealed via KMS",
+  show: "01 · donors type their amounts",
+  encrypting: "02 · making each amount private",
+  encrypted: "03 · only the private versions are sent",
+  computing: "04 · adding them up — without seeing them",
+  outputCipher: "05 · the total is also private",
+  output: "06 · only the total is revealed publicly",
 };
 
 const PHASE_NARRATION: Record<Phase, string> = {
-  show: "Three donors type their donation amounts. Nothing has been encrypted yet — the values still live in the donors' devices, in plain numbers.",
+  show:
+    "Three donors type how much they want to give. Nothing has happened yet — the numbers are still on their phones.",
   encrypting:
-    "Each donor's browser locally encrypts their amount using Zama's keys. The plaintext never leaves the device.",
+    "Each donor's browser scrambles their amount before sending. The original number never leaves the donor's device.",
   encrypted:
-    "What arrives at the contract is opaque ciphertext — a 32-byte handle. The contract has no idea what number it represents.",
+    "What arrives at the platform is unreadable. We can't tell if Donor A gave $5 or $5,000.",
   computing:
-    "The contract calls FHE.add() on the three handles. Addition happens on encrypted bytes — the chain runs the math without seeing a single plaintext number.",
+    "We add the three private amounts together — without unscrambling them. This is the trick: math on private data.",
   outputCipher:
-    "The result is also a ciphertext handle. Same closed envelope — the contract still hasn't seen any number.",
+    "The result is also private. We just made a sum, but we still can't read it.",
   output:
-    "For the public progress bar, the contract authorizes Zama's KMS to decrypt only the running total. Individual donations stay sealed forever.",
+    "For the public progress bar, we ask a separate decryption network to reveal only the total. Individual donations stay private forever.",
 };
 
 /// The story this section now tells, at a glance:
@@ -134,7 +135,7 @@ export function FheAddDiagram() {
             [ 03 / mechanism ]
           </span>
           <h2 className="font-display text-base font-medium uppercase tracking-tight text-foreground">
-            FHE.add() in motion
+            How donations stay private
           </h2>
         </div>
         <span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted-foreground sm:inline">
@@ -148,9 +149,9 @@ export function FheAddDiagram() {
           <span className="text-primary">without ever seeing them</span>.
         </h3>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          Each donation is encrypted on the donor&apos;s device before it leaves. The smart
-          contract receives ciphertext, performs the addition on ciphertext, and returns
-          ciphertext. Plaintext numbers never exist on-chain.
+          Each donation is made private on the donor&apos;s phone before it&apos;s sent.
+          The platform adds the private numbers together and stores a private total.
+          The original numbers are never visible to anyone.
         </p>
       </div>
 
@@ -225,7 +226,7 @@ export function FheAddDiagram() {
               <span className="text-primary">{PHASE_TITLE[phase]}</span>
             </span>
             <span className="hidden text-muted-foreground/70 md:inline">
-              cost · O(1) on ciphertext
+              math on private numbers
             </span>
           </div>
 
@@ -266,18 +267,18 @@ export function FheAddDiagram() {
                 <span aria-hidden className="absolute bottom-1 right-1 h-2 w-2 border-b border-r border-primary/80" />
 
                 <div className="font-mono text-[10px] uppercase tracking-widest text-primary">
-                  smart contract
+                  the platform
                 </div>
                 <div className="font-display text-xl font-medium uppercase sm:text-2xl">
-                  FHE.add()
+                  Add (private)
                 </div>
                 <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
                   {computing
-                    ? "computing on ciphertext"
+                    ? "adding without seeing"
                     : inboundFlowing
-                      ? "receiving handles"
+                      ? "receiving private amounts"
                       : outboundFlowing
-                        ? "emitting handle"
+                        ? "sending private total"
                         : "ready"}
                 </div>
 
@@ -312,7 +313,7 @@ export function FheAddDiagram() {
                         : "border-border bg-card/40 text-muted-foreground",
                     )}
                   >
-                    {phase === "output" ? "decrypted by KMS" : "ciphertext"}
+                    {phase === "output" ? "revealed publicly" : "private"}
                   </span>
                 </div>
                 <div className="mt-2 font-display text-2xl font-medium tabular-nums sm:text-3xl md:text-4xl">
@@ -332,7 +333,7 @@ export function FheAddDiagram() {
                     outputVisible ? "text-primary/70 opacity-100" : "opacity-0",
                   )}
                 >
-                  handle · {TOTAL_HANDLE}
+                  private reference · {TOTAL_HANDLE}
                 </div>
               </div>
             </div>
@@ -409,7 +410,7 @@ function BoxRow({
           scrambled ? "text-primary/70 opacity-100" : "opacity-0",
         )}
       >
-        handle · {handle}
+        private reference · {handle}
       </div>
     </div>
   );

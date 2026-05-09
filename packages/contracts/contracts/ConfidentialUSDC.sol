@@ -17,7 +17,7 @@ import {ERC7984} from "@openzeppelin/confidential-contracts/token/ERC7984/ERC798
 /// For testnet we keep an open mint so demo flows are one-click.
 contract ConfidentialUSDC is ERC7984, ZamaEthereumConfig {
     constructor()
-        ERC7984("Confidential USDC", "cUSDC", "ipfs://privacyfundme/cusdc")
+        ERC7984("USD Coin", "USDC", "ipfs://confidential-gofundme/usdc-test")
     {}
 
     function mint(externalEuint64 inH, bytes calldata proof) external {

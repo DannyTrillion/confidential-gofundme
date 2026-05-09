@@ -534,11 +534,11 @@ export default function CampaignDetail() {
 
           <div className="border border-border bg-card/40 p-5">
             <h3 className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-              Verify the encryption on-chain
+              Check this is real
             </h3>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              Don&apos;t trust the UI — read the chain directly. Each link below shows
-              you a different angle of the live encrypted state.
+              Don&apos;t trust the UI — check the public records yourself. The links
+              below open this campaign on Etherscan, where you can see the live state.
             </p>
             <ul className="mt-4 space-y-2 font-mono text-[11px]">
               <li>
@@ -550,11 +550,11 @@ export default function CampaignDetail() {
                 >
                   <span className="text-primary">→</span>
                   <span className="underline-offset-2 group-hover:underline">
-                    Read Contract → getEncryptedTotal()
+                    View the running total
                   </span>
                 </a>
                 <p className="mt-1 pl-4 text-[10px] uppercase tracking-widest text-muted-foreground/70">
-                  // returns bytes32 — a ciphertext handle, not a number
+                  // stored as a private reference · not a readable number
                 </p>
               </li>
               <li>
@@ -566,11 +566,11 @@ export default function CampaignDetail() {
                 >
                   <span className="text-primary">→</span>
                   <span className="underline-offset-2 group-hover:underline">
-                    Events → Donated(donor, idx, note)
+                    See every donation event
                   </span>
                 </a>
                 <p className="mt-1 pl-4 text-[10px] uppercase tracking-widest text-muted-foreground/70">
-                  // notice: no amount field. ever.
+                  // notice: no donation amount is ever recorded
                 </p>
               </li>
               <li>
@@ -582,11 +582,11 @@ export default function CampaignDetail() {
                 >
                   <span className="text-primary">→</span>
                   <span className="underline-offset-2 group-hover:underline">
-                    Latest tx → Input Data
+                    Open the latest donation
                   </span>
                 </a>
                 <p className="mt-1 pl-4 text-[10px] uppercase tracking-widest text-muted-foreground/70">
-                  // inH is a bytes32 ciphertext, proof is a ZK blob
+                  // the input is scrambled · the amount is unreadable
                 </p>
               </li>
             </ul>

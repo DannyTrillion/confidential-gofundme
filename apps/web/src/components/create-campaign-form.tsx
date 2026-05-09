@@ -203,7 +203,7 @@ export function CreateCampaignForm() {
 
         <Field
           label="Goal (USD)"
-          hint="// public goal · donors see how close you are · settled in cUSDC"
+          hint="// public goal · donors see how close you are · paid in USDC"
         >
           <Input
             type="number"

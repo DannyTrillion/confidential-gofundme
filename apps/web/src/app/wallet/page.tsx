@@ -23,13 +23,13 @@ export default function WalletPage() {
       <div className="space-y-5">
         <SectionMarker label="your wallet" />
         <h1 className="font-display text-4xl font-medium leading-tight tracking-tight sm:text-5xl md:text-6xl">
-          Your cUSDC, your activity.<br />
-          <span className="text-muted-foreground">Encrypted by default.</span>
+          Your USDC, your activity.<br />
+          <span className="text-muted-foreground">Private by default.</span>
         </h1>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          On-chain, your balance is a 32-byte ciphertext that no one can read.
-          Tap <span className="text-primary">reveal</span> to decrypt it locally — sign
-          one message, Zama&apos;s KMS returns the plaintext just to your browser session.
+          Your balance is private — only you can read it. Tap{" "}
+          <span className="text-primary">reveal</span> to see it. Sign one message, and
+          the number appears for your eyes only, in this browser, just for now.
         </p>
       </div>
 
@@ -190,10 +190,10 @@ function BalanceCard({
       <div className="relative z-10 flex items-center justify-between gap-2 border-b border-border/60 px-5 py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
         <span className="flex items-center gap-2">
           <span className="anim-pulse-yellow inline-block h-1.5 w-1.5 bg-primary" />
-          <span className="text-primary">cUSDC balance</span>
+          <span className="text-primary">USDC balance</span>
         </span>
         <span className="hidden text-muted-foreground/70 sm:inline">
-          erc-7984 · encrypted on-chain
+          private · only you can see it
         </span>
       </div>
 
@@ -202,7 +202,7 @@ function BalanceCard({
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
               <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                ciphertext handle
+                private balance reference
               </div>
               <div className="break-all font-mono text-base text-primary/85 sm:text-lg">
                 {handle ?? "—"}
@@ -217,7 +217,7 @@ function BalanceCard({
               </Button>
               {isZero && (
                 <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/70">
-                  // mint test cUSDC at /faucet first
+                  // get test USDC at /faucet first
                 </span>
               )}
             </div>
@@ -238,7 +238,7 @@ function BalanceCard({
                   : "—"}
               </div>
               <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                handle stays encrypted on-chain · this plaintext lives in your browser only
+                public records stay private · this number lives in your browser only
               </div>
             </div>
             <Button onClick={hide} variant="outline" size="lg">
@@ -252,7 +252,7 @@ function BalanceCard({
       </div>
 
       <div className="relative z-10 flex items-center justify-between gap-2 border-t border-border/60 px-5 py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-        <span>↳ user-decrypt via EIP-712 · KMS reveals only to your keypair</span>
+        <span>↳ revealed only to you · sign one message, see the number</span>
         <span className="hidden text-primary/60 md:inline">
           // your wallet · {shortAddress(address)}
         </span>
@@ -393,8 +393,8 @@ function ActivityCard({
             Activity
           </h2>
           <p className="mt-1 max-w-md text-xs text-muted-foreground">
-            Every cUSDC transfer in/out of your wallet over the last ~7 days. Amounts
-            are encrypted on-chain — tap any row to decrypt that specific amount.
+            Every transfer in or out of your wallet over the last ~7 days. The
+            amounts are private — tap any row to reveal that one.
           </p>
         </div>
         <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -415,10 +415,10 @@ function ActivityCard({
       ) : items.length === 0 ? (
         <div className="border border-dashed border-border bg-card/30 p-10 text-center">
           <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-            // no cUSDC activity yet
+            // no activity yet
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Mint test cUSDC at{" "}
+            Get test USDC at{" "}
             <Link href="/faucet" className="text-primary underline-offset-2 hover:underline">
               /faucet
             </Link>{" "}
