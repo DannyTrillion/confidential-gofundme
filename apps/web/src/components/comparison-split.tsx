@@ -3,21 +3,26 @@
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-type Donor = { name: string; amount: string; time: string };
+type Donor = {
+  name: string;
+  wallet: string;
+  amount: string;
+  time: string;
+};
 
 const DONORS: Donor[] = [
-  { name: "Sarah K.", amount: "$250", time: "2h ago" },
-  { name: "Anonymous", amount: "$100", time: "5h ago" },
-  { name: "Mike Johnson", amount: "$500", time: "1d ago" },
-  { name: "Linda P.", amount: "$50", time: "1d ago" },
-  { name: "Daniel A.", amount: "$150", time: "2d ago" },
-  { name: "Akira T.", amount: "$350", time: "2d ago" },
+  { name: "Sarah K.",     wallet: "0x4a91…7c40", amount: "$250", time: "2h ago" },
+  { name: "Anonymous",    wallet: "0xb2f8…1a05", amount: "$100", time: "5h ago" },
+  { name: "Mike Johnson", wallet: "0xff5a…1c92", amount: "$500", time: "1d ago" },
+  { name: "Linda P.",     wallet: "0x9b3f…2e88", amount: "$50",  time: "1d ago" },
+  { name: "Daniel A.",    wallet: "0x7ae2…0700", amount: "$150", time: "2d ago" },
+  { name: "Akira T.",     wallet: "0x3c8d…44b1", amount: "$350", time: "2d ago" },
 ];
 
 /// A/B comparison rendered as two physical-feeling 3D cards. They lean
 /// toward each other by default, follow the cursor with a subtle parallax
 /// tilt, and have visible thickness via a translated back face + a glowing
-/// spine on the outer edge (red for exposed, yellow for encrypted).
+/// spine on the outer edge (red for exposed, yellow for private).
 export function ComparisonSplit() {
   return (
     <section className="space-y-5">
@@ -41,9 +46,11 @@ export function ComparisonSplit() {
           <span className="text-primary">before and after privacy</span>.
         </h3>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          On a normal fundraising platform, every donor&apos;s name and exact amount sits on
-          a public leaderboard. On Confidential GoFundMe, individual donation amounts are kept
-          private — donors aren&apos;t ranked, and only the running total is publicly visible.
+          On a normal fundraising platform, every donor&apos;s name and exact amount sits on a
+          public leaderboard, ranking who gave the most. Here, the running total and the
+          recipient wallet stay public — donor wallets are visible (it&apos;s Ethereum) but
+          <span className="text-foreground"> how much each one gave is private</span>. No
+          leaderboard, no ranking, no public dollar amounts per donor.
         </p>
       </div>
 
@@ -59,7 +66,7 @@ export function ComparisonSplit() {
         <div className="pointer-events-none absolute left-1/2 top-1/2 z-30 hidden -translate-x-1/2 -translate-y-1/2 md:block">
           <div className="flex flex-col items-center gap-1 border-2 border-primary bg-background px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-primary shadow-[0_0_28px_hsla(49,100%,50%,0.45)]">
             <span className="text-base leading-none">→</span>
-            <span>encrypt</span>
+            <span>private</span>
           </div>
         </div>
       </div>
@@ -67,10 +74,10 @@ export function ComparisonSplit() {
       {/* Tradeoff captions */}
       <div className="grid gap-px overflow-hidden border border-border bg-border md:grid-cols-2">
         <div className="bg-background p-4 font-mono text-[10px] uppercase tracking-widest text-destructive/80">
-          ↳ donor names, exact amounts, leaderboard rank — all visible to anyone
+          ↳ names, exact amounts, ranking — all visible to anyone
         </div>
         <div className="bg-background p-4 font-mono text-[10px] uppercase tracking-widest text-primary">
-          ↳ only the running total is shown · each donation stays private
+          ↳ wallets visible (it&apos;s Ethereum) · individual amounts stay private
         </div>
       </div>
     </section>
@@ -93,7 +100,6 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
     const cy = rect.top + rect.height / 2;
     const dx = (e.clientX - cx) / (rect.width / 2);
     const dy = (e.clientY - cy) / (rect.height / 2);
-    // Up to ±5° additional tilt from cursor parallax
     setTilt({ x: -dy * 5, y: dx * 5 });
   }
 
@@ -103,9 +109,11 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
   }
 
   const transform = `rotateY(${baseY + tilt.y}deg) rotateX(${tilt.x}deg) translateZ(${hovered ? 18 : 0}px)`;
-  const exposedFields = isPrivate
-    ? "1 number"
-    : `${DONORS.length} names · ${DONORS.length} amounts · 1 number`;
+
+  // What's visible publicly on each card.
+  const publicData = isPrivate
+    ? "wallets + total"
+    : "names + amounts + ranking";
 
   return (
     <div
@@ -116,7 +124,6 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      {/* The 3D card */}
       <div
         className={cn(
           "relative h-full bg-card/92 transition-transform duration-300",
@@ -131,7 +138,7 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
             : "0 24px 60px -20px hsla(0, 75%, 55%, 0.35), 0 8px 24px -10px rgba(0, 0, 0, 0.6)",
         }}
       >
-        {/* BACK FACE — translated backward to create visible card thickness on the angled edges */}
+        {/* Back face for visible thickness */}
         <div
           aria-hidden
           className={cn(
@@ -141,7 +148,7 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
           style={{ transform: "translateZ(-18px)" }}
         />
 
-        {/* SPINE — bright bar on the OUTER edge (away from the seam) */}
+        {/* Spine — outer edge */}
         <span
           aria-hidden
           className={cn(
@@ -155,7 +162,7 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
           }}
         />
 
-        {/* Top thin highlight */}
+        {/* Top highlight + bottom shadow */}
         <span
           aria-hidden
           className="pointer-events-none absolute left-0 right-0 top-0 h-px"
@@ -165,13 +172,12 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
               : "linear-gradient(to right, transparent, hsla(0, 75%, 55%, 0.45), transparent)",
           }}
         />
-        {/* Bottom thin shadow */}
         <span
           aria-hidden
           className="pointer-events-none absolute left-0 right-0 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent"
         />
 
-        {/* Surface lighting — subtle gradient across the face */}
+        {/* Surface lighting */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -182,37 +188,13 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
           }}
         />
 
-        {/* Corner brackets — kept from prior design but re-tinted */}
-        <span
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute left-3 top-3 h-3 w-3 border-l border-t",
-            isPrivate ? "border-primary/70" : "border-destructive/60",
-          )}
-        />
-        <span
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute right-3 top-3 h-3 w-3 border-r border-t",
-            isPrivate ? "border-primary/70" : "border-destructive/60",
-          )}
-        />
-        <span
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute bottom-3 left-3 h-3 w-3 border-b border-l",
-            isPrivate ? "border-primary/70" : "border-destructive/60",
-          )}
-        />
-        <span
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute bottom-3 right-3 h-3 w-3 border-b border-r",
-            isPrivate ? "border-primary/70" : "border-destructive/60",
-          )}
-        />
+        {/* Corner brackets */}
+        <span aria-hidden className={cn("pointer-events-none absolute left-3 top-3 h-3 w-3 border-l border-t", isPrivate ? "border-primary/70" : "border-destructive/60")} />
+        <span aria-hidden className={cn("pointer-events-none absolute right-3 top-3 h-3 w-3 border-r border-t", isPrivate ? "border-primary/70" : "border-destructive/60")} />
+        <span aria-hidden className={cn("pointer-events-none absolute bottom-3 left-3 h-3 w-3 border-b border-l", isPrivate ? "border-primary/70" : "border-destructive/60")} />
+        <span aria-hidden className={cn("pointer-events-none absolute bottom-3 right-3 h-3 w-3 border-b border-r", isPrivate ? "border-primary/70" : "border-destructive/60")} />
 
-        {/* CONTENT */}
+        {/* Content */}
         <div className="relative z-10 p-6 sm:p-8">
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
@@ -232,7 +214,7 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
                   : "border-destructive/40 bg-destructive/10 text-destructive",
               )}
             >
-              {isPrivate ? "encrypted" : "fully public"}
+              {isPrivate ? "amounts private" : "fully public"}
             </span>
           </div>
 
@@ -254,7 +236,7 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
                 isPrivate ? "text-primary" : "text-destructive",
               )}
             >
-              {exposedFields}
+              {publicData}
             </span>
           </div>
 
@@ -283,11 +265,16 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
               <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 Recent donors
               </span>
-              {!isPrivate && (
-                <span className="font-mono text-[9px] uppercase tracking-widest text-destructive/80">
-                  ↓ everyone sees this
-                </span>
-              )}
+              <span
+                className={cn(
+                  "font-mono text-[9px] uppercase tracking-widest",
+                  isPrivate ? "text-primary/85" : "text-destructive/80",
+                )}
+              >
+                {isPrivate
+                  ? "↓ wallets visible · amounts private"
+                  : "↓ everyone sees who and how much"}
+              </span>
             </div>
             <ul className="space-y-2">
               {DONORS.map((d, i) => (
@@ -298,11 +285,11 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
                   <span
                     className={cn(
                       isPrivate
-                        ? "text-muted-foreground"
+                        ? "font-mono text-xs text-muted-foreground"
                         : "font-medium text-foreground",
                     )}
                   >
-                    {isPrivate ? "Anonymous" : d.name}
+                    {isPrivate ? d.wallet : d.name}
                   </span>
                   <div className="flex items-baseline gap-3">
                     <span
@@ -320,6 +307,20 @@ function ComparisonCard({ variant }: { variant: "exposed" | "private" }) {
                 </li>
               ))}
             </ul>
+          </div>
+
+          {/* Bottom note — what this side actually leaks vs. protects */}
+          <div
+            className={cn(
+              "mt-5 border-t pt-3 font-mono text-[10px] uppercase tracking-widest",
+              isPrivate
+                ? "border-border/60 text-muted-foreground"
+                : "border-border/60 text-destructive/70",
+            )}
+          >
+            {isPrivate
+              ? "// no leaderboard · no ranking · no $ per donor"
+              : "// donors ranked by amount · everyone sees the leaderboard"}
           </div>
         </div>
       </div>
